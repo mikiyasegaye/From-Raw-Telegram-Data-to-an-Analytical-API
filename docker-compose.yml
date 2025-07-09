@@ -2,7 +2,7 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15
-    container_name: telegram_data_postgres
+    container_name: telegram_data_postgres_container
     environment:
       POSTGRES_DB: telegram_data
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -18,7 +18,7 @@ services:
   # Main Application
   app:
     build: .
-    container_name: telegram_data_app
+    container_name: telegram_data_app_container
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/telegram_data
       - TELEGRAM_API_ID=${TELEGRAM_API_ID}
@@ -38,7 +38,7 @@ services:
     command: >
       sh -c "
         echo 'Waiting for postgres...' &&
-        while ! nc -z postgres 5432; do sleep 1; done &&
+        while ! pg_isready -h postgres -p 5432; do sleep 1; done &&
         echo 'PostgreSQL started' &&
         python -m app.setup_database &&
         uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -47,7 +47,7 @@ services:
   # dbt Service
   dbt:
     build: .
-    container_name: telegram_data_dbt
+    container_name: telegram_data_dbt_container
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/telegram_data
     volumes:
@@ -61,7 +61,7 @@ services:
     command: >
       sh -c "
         echo 'Waiting for postgres...' &&
-        while ! nc -z postgres 5432; do sleep 1; done &&
+        while ! pg_isready -h postgres -p 5432; do sleep 1; done &&
         echo 'PostgreSQL started' &&
         dbt debug &&
         dbt deps &&
@@ -71,7 +71,7 @@ services:
   # Dagster Orchestration
   dagster:
     build: .
-    container_name: telegram_data_dagster
+    container_name: telegram_data_dagster_container
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/telegram_data
       - TELEGRAM_API_ID=${TELEGRAM_API_ID}

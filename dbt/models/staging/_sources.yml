@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw data loaded from the data lake
+    tables:
+      - name: telegram_messages
+        description: Raw telegram messages loaded from JSON files
+        columns:
+          - name: id
+            description: Unique message identifier
+            tests:
+              - not_null
+              - unique
+          - name: date
+            description: Message timestamp
+            tests:
+              - not_null
+          - name: message
+            description: Message text content
+          - name: sender_id
+            description: Sender user ID
+          - name: channel
+            description: Source channel name
+            tests:
+              - not_null
+          - name: extraction_date
+            description: Date when data was extracted
+            tests:
+              - not_null
