@@ -1,0 +1,94 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: telegram_data_postgres
+    environment:
+      POSTGRES_DB: telegram_data
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - telegram_network
+
+  # Main Application
+  app:
+    build: .
+    container_name: telegram_data_app
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/telegram_data
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - TELEGRAM_PHONE=${TELEGRAM_PHONE}
+      - TELEGRAM_SESSION_NAME=${TELEGRAM_SESSION_NAME:-telegram_session}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./dbt:/app/dbt
+    depends_on:
+      - postgres
+    networks:
+      - telegram_network
+    command: >
+      sh -c "
+        echo 'Waiting for postgres...' &&
+        while ! nc -z postgres 5432; do sleep 1; done &&
+        echo 'PostgreSQL started' &&
+        python -m app.setup_database &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  # dbt Service
+  dbt:
+    build: .
+    container_name: telegram_data_dbt
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/telegram_data
+    volumes:
+      - ./dbt:/app/dbt
+      - ./data:/app/data
+    depends_on:
+      - postgres
+    networks:
+      - telegram_network
+    working_dir: /app/dbt
+    command: >
+      sh -c "
+        echo 'Waiting for postgres...' &&
+        while ! nc -z postgres 5432; do sleep 1; done &&
+        echo 'PostgreSQL started' &&
+        dbt debug &&
+        dbt deps &&
+        dbt run
+      "
+
+  # Dagster Orchestration
+  dagster:
+    build: .
+    container_name: telegram_data_dagster
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/telegram_data
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - TELEGRAM_PHONE=${TELEGRAM_PHONE}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dagster:/app/dagster
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+    networks:
+      - telegram_network
+    command: dagster dev -h 0.0.0.0 -p 3000
+
+networks:
+  telegram_network:
+    driver: bridge
