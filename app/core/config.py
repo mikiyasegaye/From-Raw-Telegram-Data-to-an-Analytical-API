@@ -56,9 +56,13 @@ class Settings:
 
     # Telegram Channels to scrape
     TELEGRAM_CHANNELS = [
+        # CheMed - የመድሀኒትና የህክምና እቃዎች አፋላጊ እና አቅራቢ ድርጅት (477 subscribers)
+        "CheMed123",
+        # Lobelia pharmacy and cosmetics - American and Canadian Genuine products (16,868 subscribers)
         "lobelia4cosmetics",
+        # Tikvah | Pharma - Pharma Consultant, Sales, Marketing, Promotion (90,154 members)
         "tikvahpharma",
-        # Add more channels as needed
+        # Add more channels from https://et.tgstat.com/medicine as needed
     ]
 
     @classmethod
