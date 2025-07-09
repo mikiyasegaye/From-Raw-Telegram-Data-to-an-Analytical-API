@@ -15,7 +15,12 @@ This project builds a robust data platform to generate insights about Ethiopian 
 
 ## Current Status
 
-**Task 0 - Project Setup & Environment Management** is complete! The foundation is ready for the remaining tasks:
+**Task 0 - Project Setup & Environment Management** **COMPLETE**
+**Task 1 - Data Scraping and Collection** **COMPLETE**
+
+### Completed Tasks:
+
+**Task 0 - Project Setup & Environment Management:**
 
 - **Environment Management**: Docker, requirements.txt, environment variables
 - **Database Setup**: PostgreSQL with initialization scripts
@@ -24,9 +29,19 @@ This project builds a robust data platform to generate insights about Ethiopian 
 - **Basic API**: FastAPI application with health checks
 - **Documentation**: Comprehensive README and setup instructions
 
-**Ready for next tasks:**
+**Task 1 - Data Scraping and Collection:**
 
-- **Task 1**: Telegram scraping infrastructure ready
+- **Telegram Scraper**: Extracts data from Ethiopian medical channels
+- **Data Lake**: Partitioned JSON storage with date-based organization
+- **Image Download**: Automatic media download for YOLO analysis
+- **Rate Limiting**: Robust error handling and retry mechanisms
+- **Logging System**: Comprehensive logging with file rotation
+- **Database Integration**: Seamless loading into PostgreSQL
+- **Command-Line Interface**: Easy-to-use CLI with multiple options
+- **Test Suite**: Complete validation of all components
+
+### Ready for next tasks:
+
 - **Task 2**: Database and dbt setup ready
 - **Task 3**: YOLO integration ready
 - **Task 4**: FastAPI foundation ready
@@ -112,26 +127,33 @@ docker-compose up postgres app
 │   ├── core/                     # Core configuration and utilities ✅
 │   │   ├── config.py            # Environment and settings management
 │   │   └── __init__.py
-│   ├── scrapers/                 # Telegram scraping modules (ready for Task 1)
+│   ├── scrapers/                 # Telegram scraping modules **COMPLETE**
+│   │   ├── telegram_scraper.py  # Main scraper implementation
+│   │   ├── data_loader.py       # Database loading functionality
+│   │   ├── run_scraper.py       # Command-line interface
+│   │   └── test_scraper.py      # Test suite
 │   ├── models/                   # Data models (ready for Task 2)
 │   ├── utils/                    # Utility functions
-│   ├── main.py                   # FastAPI application ✅
-│   ├── setup_database.py         # Database initialization ✅
+│   │   └── logger.py            # Logging system
+│   ├── main.py                   # FastAPI application
+│   ├── setup_database.py         # Database initialization
 │   └── __init__.py
 ├── data/                         # Data storage
-│   ├── raw/telegram_messages/   # Raw scraped data (ready for Task 1)
+│   ├── raw/telegram_messages/   # Raw scraped data **ACTIVE**
 │   ├── processed/               # Processed data (ready for Task 2)
-│   └── images/                  # Downloaded images (ready for Task 3)
+│   └── images/                  # Downloaded images **ACTIVE**
 ├── dbt/                         # dbt transformation models (ready for Task 2)
 ├── dagster/                     # Dagster orchestration (ready for Task 5)
 ├── tests/                       # Test files
-├── logs/                        # Application logs
-├── requirements.txt              # Python dependencies ✅
-├── Dockerfile                   # Application container ✅
-├── docker-compose.yml           # Multi-service orchestration ✅
-├── init.sql                    # Database initialization ✅
-├── env.example                 # Environment template ✅
-└── README.md                   # Project documentation ✅
+├── logs/                        # Application logs **ACTIVE**
+├── requirements.txt              # Python dependencies
+├── requirements-minimal.txt      # Minimal dependencies for Task 1
+├── Dockerfile                   # Application container
+├── docker-compose.yml           # Multi-service orchestration
+├── init.sql                    # Database initialization
+├── env.example                 # Environment template
+├── telegram_session.session     # Telegram session file
+└── README.md                   # Project documentation
 ```
 
 ## Configuration
@@ -157,11 +179,16 @@ docker-compose up postgres app
 
 ## Data Pipeline
 
-### 1. Data Extraction (Task 1)
+### 1. Data Extraction (Task 1) **COMPLETE**
 
 - Scrapes data from Ethiopian medical Telegram channels
-- Stores raw data in partitioned JSON files
-- Downloads images for object detection
+- Stores raw data in partitioned JSON files (`data/raw/telegram_messages/YYYY-MM-DD/channel_name.json`)
+- Downloads images for object detection (`data/images/`)
+- Robust logging and error handling with file rotation
+- Rate limiting and retry mechanisms for API stability
+- Command-line interface with multiple options
+- Database integration for seamless data loading
+- Comprehensive test suite with 4/4 tests passing
 
 ### 2. Data Modeling (Task 2)
 
@@ -201,10 +228,11 @@ pytest --cov=app tests/
 
 The platform answers key business questions:
 
-1. **Top Products**: Most frequently mentioned medical products
-2. **Price Analysis**: Product price variations across channels
-3. **Visual Content**: Channels with most image content
-4. **Trends**: Daily/weekly posting volume trends
+1. **Top Products**: Most frequently mentioned medical products across Ethiopian channels
+2. **Price Analysis**: Product price variations across different channels and regions
+3. **Visual Content**: Channels with most image content for product analysis
+4. **Trends**: Daily/weekly posting volume trends for market insights
+5. **Channel Performance**: Comparative analysis of CheMed123, lobelia4cosmetics, and tikvahpharma
 
 ## API Endpoints
 
@@ -219,16 +247,87 @@ The platform answers key business questions:
 
 ```bash
 # Install dependencies
-pip install -r requirements.txt
+pip install -r requirements-minimal.txt
 
 # Setup database
 python -m app.setup_database
+
+# Test scraper configuration
+python -m app.scrapers.test_scraper
+
+# Run scraper (with options)
+python -m app.scrapers.run_scraper --limit 500 --load-data
 
 # Run FastAPI
 uvicorn app.main:app --reload
 
 # Run Dagster
 dagster dev
+```
+
+### Quick Start
+
+```bash
+# 1. Activate virtual environment
+source venv/bin/activate
+
+# 2. Test the scraper
+python -m app.scrapers.test_scraper
+
+# 3. Run a small test scrape
+python -m app.scrapers.run_scraper --limit 10 --dry-run --verbose
+
+# 4. Run actual scraping
+python -m app.scrapers.run_scraper --limit 100 --load-data
+```
+
+### Scraper Usage
+
+```bash
+# Test the scraper configuration
+python -m app.scrapers.test_scraper
+
+# Basic scraping (1000 messages per channel)
+python -m app.scrapers.run_scraper
+
+# Scrape with custom limit
+python -m app.scrapers.run_scraper --limit 500
+
+# Scrape specific channels
+python -m app.scrapers.run_scraper --channels CheMed123 lobelia4cosmetics tikvahpharma
+
+# Load data into database after scraping
+python -m app.scrapers.run_scraper --load-data
+
+# Dry run (test without scraping)
+python -m app.scrapers.run_scraper --dry-run --verbose
+
+# Scrape and load with custom limit
+python -m app.scrapers.run_scraper --limit 100 --load-data --verbose
+```
+
+### Supported Channels
+
+The scraper is configured to extract data from the following Ethiopian medical Telegram channels:
+
+- **CheMed123** (477 subscribers): የመድሀኒትና የህክምና እቃዎች አፋላጊ እና አቅራቢ ድርጅት
+- **lobelia4cosmetics** (16,868 subscribers): American and Canadian Genuine products
+- **tikvahpharma** (90,154 members): Pharma Consultant, Sales, Marketing, Promotion
+
+### Data Lake Structure
+
+```
+data/
+├── raw/telegram_messages/
+│   ├── 2024-01-15/
+│   │   ├── CheMed123.json
+│   │   ├── lobelia4cosmetics.json
+│   │   └── tikvahpharma.json
+│   └── ...
+└── images/
+    ├── CheMed123_12345.jpg
+    ├── lobelia4cosmetics_67890.jpg
+    └── ...
 ```
 
 ### Database Management
@@ -270,6 +369,15 @@ For support and questions:
 - Create an issue in the repository
 - Contact the development team
 - Check the documentation
+
+## Task Progress
+
+- **Task 0**: Project Setup & Environment Management - **COMPLETE**
+- **Task 1**: Data Scraping and Collection - **COMPLETE**
+- **Task 2**: Data Modeling and Transformation - **READY TO START**
+- **Task 3**: Data Enrichment with YOLO - **READY TO START**
+- **Task 4**: Analytics API with FastAPI - **READY TO START**
+- **Task 5**: Pipeline Orchestration with Dagster - **READY TO START**
 
 ---
 

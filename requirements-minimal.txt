@@ -1,0 +1,23 @@
+# Core dependencies - minimal set for Task 1
+python-dotenv==1.0.0
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+
+# Database
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+
+# Telegram API
+telethon==1.32.1
+
+# Data processing
+pandas==2.1.4
+numpy==1.26.2
+
+# HTTP requests
+requests==2.31.0
+aiohttp==3.9.1
+
+# Logging
+structlog==23.2.0 
