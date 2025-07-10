@@ -1,0 +1,111 @@
+version: 2
+
+models:
+  - name: dim_channels
+    description: Dimension table containing channel information and metrics
+    columns:
+      - name: channel_id
+        description: Unique channel identifier
+        tests:
+          - not_null
+          - unique
+      - name: channel_category
+        description: Category of the channel (Medical, Cosmetics, etc.)
+        tests:
+          - not_null
+      - name: business_sector
+        description: Business sector classification
+        tests:
+          - not_null
+      - name: total_messages
+        description: Total number of messages in the channel
+      - name: medical_content_percentage
+        description: Percentage of messages containing medical content
+      - name: media_percentage
+        description: Percentage of messages containing media
+
+  - name: dim_dates
+    description: Dimension table for time-based analysis with daily metrics
+    columns:
+      - name: date_id
+        description: Unique date identifier
+        tests:
+          - not_null
+          - unique
+      - name: full_date
+        description: Full date timestamp
+        tests:
+          - not_null
+      - name: year
+        description: Year
+        tests:
+          - not_null
+      - name: month
+        description: Month number
+        tests:
+          - not_null
+      - name: day
+        description: Day of month
+        tests:
+          - not_null
+      - name: is_weekend
+        description: Boolean indicating if the date is a weekend
+      - name: season
+        description: Season of the year
+      - name: quarter
+        description: Quarter of the year
+      - name: total_messages
+        description: Total messages on this date
+      - name: medical_content_percentage
+        description: Percentage of medical content on this date
+      - name: media_percentage
+        description: Percentage of media content on this date
+
+  - name: fct_messages
+    description: Fact table containing message-level data with foreign keys to dimensions
+    columns:
+      - name: message_id
+        description: Unique message identifier
+        tests:
+          - not_null
+          - unique
+      - name: channel_id
+        description: Foreign key to dim_channels
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_channels')
+              field: channel_id
+      - name: date_id
+        description: Foreign key to dim_dates
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_dates')
+              field: date_id
+      - name: message
+        description: Message text content
+      - name: message_length
+        description: Length of the message text
+      - name: message_type
+        description: Type of message (text, media, other)
+      - name: is_medical_content
+        description: Boolean indicating if message contains medical content
+      - name: has_media
+        description: Boolean indicating if message contains media
+      - name: sender_id
+        description: Sender user ID
+      - name: views
+        description: Number of views for the message
+      - name: forwards
+        description: Number of forwards for the message
+      - name: replies
+        description: Number of replies for the message
+      - name: reaction_count
+        description: Number of reactions for the message
+      - name: engagement_score
+        description: Calculated engagement score
+      - name: viral_score
+        description: Calculated viral score based on engagement metrics
+      - name: content_category
+        description: Categorization of content type

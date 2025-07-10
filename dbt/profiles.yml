@@ -1,0 +1,15 @@
+telegram_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DB_HOST', 'localhost') }}"
+      user: "{{ env_var('POSTGRES_USER', 'postgres') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'password') }}"
+      port: "{{ env_var('POSTGRES_PORT', 5432) | int }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'telegram_data') }}"
+      schema: "{{ env_var('DB_SCHEMA', 'public') }}"
+      threads: 4
+      keepalives_idle: 0
+      search_path: public
+      retries: 1

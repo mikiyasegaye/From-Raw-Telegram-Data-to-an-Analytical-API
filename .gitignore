@@ -243,3 +243,6 @@ dagster_home/
 # Temporary files
 *.tmp
 *.temp
+
+# Local Postgres data (Docker volume)
+postgres_data/
