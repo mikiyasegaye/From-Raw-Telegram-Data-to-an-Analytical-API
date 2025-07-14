@@ -28,3 +28,22 @@ sources:
             description: Date when data was extracted
             tests:
               - not_null
+      - name: image_detections
+        description: YOLO object detection results from Telegram images
+        columns:
+          - name: image_file
+            description: Name of the image file
+            tests:
+              - not_null
+          - name: class_name
+            description: Detected object class
+            tests:
+              - not_null
+          - name: confidence
+            description: Detection confidence score
+            tests:
+              - not_null
+          - name: bbox
+            description: Bounding box coordinates [x1, y1, x2, y2]
+          - name: bbox_normalized
+            description: Normalized bounding box coordinates
