@@ -18,6 +18,7 @@ This project builds a robust data platform to generate insights about Ethiopian 
 **Task 0 - Project Setup & Environment Management** **COMPLETE**
 **Task 1 - Data Scraping and Collection** **COMPLETE**
 **Task 2 - Data Modeling and Transformation** **COMPLETE**
+**Task 3 - Data Enrichment (YOLOv8 Medical Detection):** **COMPLETE**
 
 ### Completed Tasks:
 
@@ -54,9 +55,14 @@ This project builds a robust data platform to generate insights about Ethiopian 
 - **Business Logic**: Medical content detection and engagement scoring
 - **Documentation**: Comprehensive model documentation and schema definitions
 
+**Task 3 - Data Enrichment (YOLOv8 Medical Detection):**
+- Implemented YOLOv8-based detection pipeline for medical equipment in images
+- Automated loading of detection results into the database
+- Integrated detection data into dbt models and analytics
+- Documented the process and pipeline steps
+
 ### Ready for next tasks:
 
-- **Task 3**: YOLO integration ready
 - **Task 4**: FastAPI foundation ready
 - **Task 5**: Dagster orchestration ready
 
@@ -216,11 +222,30 @@ docker-compose up postgres app
 - **Business Logic**: Medical content detection and engagement scoring
 - **Documentation**: Comprehensive model documentation and schema definitions
 
-### 3. Data Enrichment (Task 3)
+### 3. Data Enrichment (Task 3) **COMPLETE**
 
 - YOLOv8 object detection on images
 - Enriches data with detected objects
 - Links visual content to messages
+
+#### Task 3: Medical Image Detection Pipeline
+
+**Overview:**
+We implemented a YOLOv8-based pipeline to detect medical equipment in images from Ethiopian medical businesses.
+
+**Steps:**
+1. **Detection:**
+   - Run `scripts/medical_detection.py` to process images in `data/images/` and output results to `data/processed/medical_detections.csv`.
+2. **Load Results:**
+   - Use `scripts/load_detection_results.py` to load detection results into the database.
+3. **dbt Models:**
+   - Run `dbt run` and `dbt test` to transform and validate detection data.
+4. **Documentation:**
+   - Generate docs with `dbt docs generate`.
+
+**Notes:**
+- If no detections are found, the pipeline still runs end-to-end for reproducibility.
+- To retrain or improve detection, update the YOLO model and rerun the detection script.
 
 ### 4. Analytics API (Task 4)
 
