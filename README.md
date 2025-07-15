@@ -19,6 +19,7 @@ This project builds a robust data platform to generate insights about Ethiopian 
 **Task 1 - Data Scraping and Collection** **COMPLETE**
 **Task 2 - Data Modeling and Transformation** **COMPLETE**
 **Task 3 - Data Enrichment (YOLOv8 Medical Detection):** **COMPLETE**
+**Task 4 - FastAPI Analytical API** **COMPLETE**
 
 ### Completed Tasks:
 
@@ -61,9 +62,17 @@ This project builds a robust data platform to generate insights about Ethiopian 
 - Integrated detection data into dbt models and analytics
 - Documented the process and pipeline steps
 
+**Task 4 - FastAPI Analytical API:**
+- **API Structure**: Modular FastAPI application with APIRouter
+- **Analytical Endpoints**: Business-focused endpoints for insights
+- **Data Validation**: Pydantic schemas for request/response validation
+- **Database Integration**: SQLAlchemy with connection pooling
+- **CRUD Operations**: Complex queries against dbt models
+- **Error Handling**: Comprehensive error handling and logging
+- **API Documentation**: Auto-generated OpenAPI/Swagger docs
+
 ### Ready for next tasks:
 
-- **Task 4**: FastAPI foundation ready
 - **Task 5**: Dagster orchestration ready
 
 ## Architecture
@@ -135,14 +144,34 @@ docker-compose up postgres app
 ### 3. Access Services
 
 - **FastAPI Application**: http://localhost:8000
+- **FastAPI Documentation**: http://localhost:8000/docs
+- **FastAPI ReDoc**: http://localhost:8000/redoc
 - **Dagster UI**: http://localhost:3000
 - **PostgreSQL Database**: localhost:5432
+
+### 4. Run the FastAPI Application
+
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Run the FastAPI application
+python -m app.main
+
+# Or using uvicorn directly
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
 ## Project Structure
 
 ```
 ├── app/                           # Main application code
-│   ├── api/                      # FastAPI endpoints (ready for Task 4)
+│   ├── api/                      # FastAPI endpoints **COMPLETE**
+│   │   ├── main.py              # API router with analytical endpoints
+│   │   ├── schemas.py           # Pydantic models for validation
+│   │   ├── database.py          # Database connection management
+│   │   ├── crud.py              # CRUD operations for analytics
+│   │   └── __init__.py
 │   ├── core/                     # Core configuration and utilities ✅
 │   │   ├── config.py            # Environment and settings management
 │   │   └── __init__.py
@@ -154,14 +183,14 @@ docker-compose up postgres app
 │   ├── models/                   # Data models (ready for Task 2)
 │   ├── utils/                    # Utility functions
 │   │   └── logger.py            # Logging system
-│   ├── main.py                   # FastAPI application
+│   ├── main.py                   # FastAPI application **COMPLETE**
 │   ├── setup_database.py         # Database initialization
 │   └── __init__.py
 ├── data/                         # Data storage
 │   ├── raw/telegram_messages/   # Raw scraped data **ACTIVE**
 │   ├── processed/               # Processed data (ready for Task 2)
 │   └── images/                  # Downloaded images **ACTIVE**
-├── dbt/                         # dbt transformation models (ready for Task 2)
+├── dbt/                         # dbt transformation models **COMPLETE**
 ├── dagster/                     # Dagster orchestration (ready for Task 5)
 ├── tests/                       # Test files
 ├── logs/                        # Application logs **ACTIVE**
@@ -247,11 +276,49 @@ We implemented a YOLOv8-based pipeline to detect medical equipment in images fro
 - If no detections are found, the pipeline still runs end-to-end for reproducibility.
 - To retrain or improve detection, update the YOLO model and rerun the detection script.
 
-### 4. Analytics API (Task 4)
+### 4. Analytics API (Task 4) **COMPLETE**
 
-- FastAPI endpoints for business insights
-- Query optimization for analytical queries
-- Data validation with Pydantic
+- **Top Products Endpoint**: `/api/reports/top-products` - Most frequently mentioned medical products
+- **Channel Activity**: `/api/channels/{channel_name}/activity` - Posting activity and engagement metrics
+- **Message Search**: `/api/search/messages` - Search messages by keywords
+- **Channel Summary**: `/api/channels` - Summary statistics for all channels
+- **Medical Content Stats**: `/api/reports/medical-content` - Medical vs non-medical content analysis
+- **Data Validation**: Pydantic schemas ensure data integrity
+- **Query Optimization**: Efficient SQL queries against dbt models
+- **API Documentation**: Auto-generated OpenAPI/Swagger documentation
+
+#### Available API Endpoints:
+
+**Analytics Endpoints:**
+- `GET /api/reports/top-products?limit=10&days=30` - Get top mentioned medical products
+- `GET /api/channels/{channel_name}/activity?days=30` - Channel activity analysis
+- `GET /api/channels` - All channels summary
+- `GET /api/reports/medical-content?days=30` - Medical content statistics
+
+**Search Endpoints:**
+- `GET /api/search/messages?query=paracetamol&limit=20` - Search messages by keyword
+
+**Health Endpoints:**
+- `GET /` - Main application health check
+- `GET /health` - Detailed health status
+
+**Documentation:**
+- `GET /docs` - Interactive API documentation (Swagger UI)
+- `GET /redoc` - Alternative API documentation (ReDoc)
+
+#### Running the API:
+
+```bash
+# Start the FastAPI application
+source venv/bin/activate
+python -m app.main
+
+# Access the API
+curl http://localhost:8000/
+
+# View API documentation
+open http://localhost:8000/docs
+```
 
 ### 5. Orchestration (Task 5)
 
@@ -269,6 +336,66 @@ pytest tests/
 pytest --cov=app tests/
 ```
 
+## API Testing Examples
+
+### Test the FastAPI Application
+
+```bash
+# Start the API
+source venv/bin/activate
+python -m app.main
+
+# Test health endpoint
+curl http://localhost:8000/
+
+# Test API documentation
+open http://localhost:8000/docs
+```
+
+### Example API Calls
+
+```bash
+# Get top mentioned medical products
+curl "http://localhost:8000/api/reports/top-products?limit=5&days=30"
+
+# Get channel activity for a specific channel
+curl "http://localhost:8000/api/channels/CheMed123/activity?days=30"
+
+# Search for messages containing "paracetamol"
+curl "http://localhost:8000/api/search/messages?query=paracetamol&limit=10"
+
+# Get summary of all channels
+curl "http://localhost:8000/api/channels"
+
+# Get medical content statistics
+curl "http://localhost:8000/api/reports/medical-content?days=30"
+```
+
+### Python API Testing
+
+```python
+import requests
+
+# Base URL
+base_url = "http://localhost:8000"
+
+# Test health check
+response = requests.get(f"{base_url}/")
+print(response.json())
+
+# Get top products
+response = requests.get(f"{base_url}/api/reports/top-products", 
+                       params={"limit": 5, "days": 30})
+products = response.json()
+print(f"Found {len(products)} top products")
+
+# Search messages
+response = requests.get(f"{base_url}/api/search/messages", 
+                       params={"query": "vitamin", "limit": 5})
+messages = response.json()
+print(f"Found {len(messages)} messages containing 'vitamin'")
+```
+
 ## Business Questions Answered
 
 The platform answers key business questions:
@@ -284,7 +411,9 @@ The platform answers key business questions:
 - `GET /api/reports/top-products?limit=10` - Top mentioned products
 - `GET /api/channels/{channel_name}/activity` - Channel activity
 - `GET /api/search/messages?query=paracetamol` - Message search
-- `GET /api/health` - Health check
+- `GET /api/channels` - All channels summary
+- `GET /api/reports/medical-content` - Medical content statistics
+- `GET /health` - Health check
 
 ## Development
 
@@ -419,9 +548,9 @@ For support and questions:
 
 - **Task 0**: Project Setup & Environment Management - **COMPLETE**
 - **Task 1**: Data Scraping and Collection - **COMPLETE**
-- **Task 2**: Data Modeling and Transformation - **READY TO START**
-- **Task 3**: Data Enrichment with YOLO - **READY TO START**
-- **Task 4**: Analytics API with FastAPI - **READY TO START**
+- **Task 2**: Data Modeling and Transformation - **COMPLETE**
+- **Task 3**: Data Enrichment with YOLO - **COMPLETE**
+- **Task 4**: Analytics API with FastAPI - **COMPLETE**
 - **Task 5**: Pipeline Orchestration with Dagster - **READY TO START**
 
 ---
