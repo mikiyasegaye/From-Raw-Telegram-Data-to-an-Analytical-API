@@ -20,11 +20,11 @@ This project builds a robust data platform to generate insights about Ethiopian 
 **Task 2 - Data Modeling and Transformation** **COMPLETE**
 **Task 3 - Data Enrichment (YOLOv8 Medical Detection):** **COMPLETE**
 **Task 4 - FastAPI Analytical API** **COMPLETE**
+**Task 5 - Pipeline Orchestration (Dagster)** **COMPLETE**
 
 ### Completed Tasks:
 
 **Task 0 - Project Setup & Environment Management:**
-
 - **Environment Management**: Docker, requirements.txt, environment variables
 - **Database Setup**: PostgreSQL with initialization scripts
 - **Project Structure**: Professional directory organization
@@ -33,7 +33,6 @@ This project builds a robust data platform to generate insights about Ethiopian 
 - **Documentation**: Comprehensive README and setup instructions
 
 **Task 1 - Data Scraping and Collection:**
-
 - **Telegram Scraper**: Extracts data from Ethiopian medical channels
 - **Data Lake**: Partitioned JSON storage with date-based organization
 - **Image Download**: Automatic media download for YOLO analysis
@@ -44,7 +43,6 @@ This project builds a robust data platform to generate insights about Ethiopian 
 - **Test Suite**: Complete validation of all components
 
 **Task 2 - Data Modeling and Transformation:**
-
 - **Raw Data Loading**: Script to load JSON files into PostgreSQL raw schema
 - **dbt Project Setup**: Complete dbt configuration with PostgreSQL adapter
 - **Staging Models**: Clean and restructure raw data with data type casting
@@ -71,9 +69,16 @@ This project builds a robust data platform to generate insights about Ethiopian 
 - **Error Handling**: Comprehensive error handling and logging
 - **API Documentation**: Auto-generated OpenAPI/Swagger docs
 
-### Ready for next tasks:
+**Task 5 - Pipeline Orchestration (Dagster):**
+- **Asset-Based Pipeline**: Defined data assets with dependencies
+- **Job Orchestration**: Multiple job types for different use cases
+- **Scheduling**: Automated daily and weekly pipeline execution
+- **Monitoring**: Real-time pipeline monitoring and observability
+- **Error Handling**: Robust error handling and retry mechanisms
+- **Configuration Management**: Centralized pipeline configuration
+- **UI Management**: Web-based interface for pipeline management
 
-- **Task 5**: Dagster orchestration ready
+### Project Status: **PRODUCTION READY** 🚀
 
 ## Architecture
 
@@ -88,6 +93,12 @@ This project builds a robust data platform to generate insights about Ethiopian 
 │   FastAPI       │◀───│   dbt Models    │◀───│   YOLO Object   │
 │   Analytics API │    │   (Star Schema) │    │   Detection     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
+                                ▲
+                                │
+                        ┌─────────────────┐
+                        │   Dagster       │
+                        │   Orchestration │
+                        └─────────────────┘
 ```
 
 ## Quick Start
@@ -123,6 +134,9 @@ TELEGRAM_PHONE=your_phone_number_here
 
 # Database Configuration
 POSTGRES_PASSWORD=your_secure_password_here
+
+# Dagster Configuration
+DAGSTER_HOME=./dagster_home
 ```
 
 4. Install Python dependencies:
@@ -191,7 +205,14 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 │   ├── processed/               # Processed data (ready for Task 2)
 │   └── images/                  # Downloaded images **ACTIVE**
 ├── dbt/                         # dbt transformation models **COMPLETE**
-├── dagster/                     # Dagster orchestration (ready for Task 5)
+├── dagster/                     # Dagster orchestration **COMPLETE**
+│   ├── assets.py               # Data pipeline assets
+│   ├── jobs.py                 # Pipeline job definitions
+│   ├── repository.py           # Dagster repository
+│   ├── workspace.yaml          # Workspace configuration
+│   ├── config.yaml             # Pipeline configuration
+│   └── __init__.py
+├── dagster_home/                # Dagster instance data **ACTIVE**
 ├── tests/                       # Test files
 ├── logs/                        # Application logs **ACTIVE**
 ├── requirements.txt              # Python dependencies
@@ -217,6 +238,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 | `DATABASE_URL`         | Database connection string | Auto-generated |
 | `YOLO_MODEL`           | YOLO model file            | `yolov8n.pt`   |
 | `CONFIDENCE_THRESHOLD` | YOLO confidence threshold  | `0.5`          |
+| `DAGSTER_HOME`         | Dagster instance directory | `./dagster_home`|
 
 ### Telegram API Setup
 
@@ -238,6 +260,28 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - Database integration for seamless data loading
 - Comprehensive test suite with 4/4 tests passing
 
+#### Running the Scraper:
+
+```bash
+# Test the scraper configuration
+python -m app.scrapers.test_scraper
+
+# Basic scraping (1000 messages per channel)
+python -m app.scrapers.run_scraper
+
+# Scrape with custom limit
+python -m app.scrapers.run_scraper --limit 500
+
+# Scrape specific channels
+python -m app.scrapers.run_scraper --channels CheMed123 lobelia4cosmetics tikvahpharma
+
+# Load data into database after scraping
+python -m app.scrapers.run_scraper --load-data
+
+# Dry run (test without scraping)
+python -m app.scrapers.run_scraper --dry-run --verbose
+```
+
 ### 2. Data Modeling (Task 2) **COMPLETE**
 
 - **Raw Data Loading**: Script to load JSON files into PostgreSQL raw schema
@@ -250,6 +294,21 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 - **Data Quality**: Built-in and custom tests for validation
 - **Business Logic**: Medical content detection and engagement scoring
 - **Documentation**: Comprehensive model documentation and schema definitions
+
+#### Running dbt:
+
+```bash
+# Run dbt models
+cd dbt
+dbt run
+
+# Run tests
+dbt test
+
+# Generate documentation
+dbt docs generate
+dbt docs serve --port 8081
+```
 
 ### 3. Data Enrichment (Task 3) **COMPLETE**
 
@@ -320,11 +379,74 @@ curl http://localhost:8000/
 open http://localhost:8000/docs
 ```
 
-### 5. Orchestration (Task 5)
+### 5. Orchestration (Task 5) **COMPLETE**
 
-- Dagster for pipeline orchestration
-- Scheduled data processing
-- Monitoring and alerting
+- **Dagster Pipeline**: Complete orchestration of the data workflow
+- **Asset Dependencies**: Clear data lineage and dependencies
+- **Scheduled Execution**: Automated daily and weekly runs
+- **Monitoring**: Real-time pipeline monitoring and alerting
+- **Error Recovery**: Robust error handling and retry logic
+
+#### Available Pipeline Jobs:
+
+**Main Pipeline:**
+- `ethiopian_medical_analytics_pipeline` - Complete end-to-end pipeline
+- `quick_test_pipeline` - Quick test with minimal data
+- `data_pipeline_only` - Data pipeline without YOLO detection
+
+**Component Jobs:**
+- `scraping_job` - Data scraping only
+- `transformation_job` - dbt transformations only
+- `quality_checks_job` - Data quality tests only
+
+#### Pipeline Assets:
+
+**Raw Data:**
+- `raw_telegram_data` - Scraped Telegram data
+- `raw_data_in_postgres` - Data loaded into database
+
+**Transformed Data:**
+- `dbt_staging_models` - Cleaned and structured data
+- `dbt_mart_models` - Final analytical tables
+
+**Enriched Data:**
+- `yolo_detection_results` - Object detection results
+
+**Quality & Documentation:**
+- `dbt_tests` - Data quality validation
+- `dbt_documentation` - Generated documentation
+- `pipeline_summary` - Pipeline completion summary
+
+#### Running the Pipeline:
+
+```bash
+# Launch Dagster UI
+source venv/bin/activate
+export DAGSTER_HOME=./dagster_home
+dagster dev --host 0.0.0.0 --port 3000
+
+# Or use the management script
+python scripts/run_dagster.py ui
+
+# Run specific jobs
+python scripts/run_dagster.py run --job ethiopian_medical_analytics_pipeline
+python scripts/run_dagster.py run --job quick_test_pipeline
+
+# List available jobs
+python scripts/run_dagster.py list
+```
+
+#### Pipeline Schedules:
+
+- **Daily Schedule**: Runs at 6 AM daily (enabled by default)
+- **Weekly Schedule**: Runs on Monday at 8 AM (disabled by default)
+
+#### Access Dagster UI:
+
+- **Dagster UI**: http://localhost:3000
+- **Asset Graph**: Visual representation of data dependencies
+- **Job Monitoring**: Real-time job execution monitoring
+- **Schedule Management**: Configure and manage automated runs
 
 ## Testing
 
@@ -453,6 +575,16 @@ python -m app.scrapers.run_scraper --limit 10 --dry-run --verbose
 
 # 4. Run actual scraping
 python -m app.scrapers.run_scraper --limit 100 --load-data
+
+# 5. Run dbt transformations
+cd dbt && dbt run
+
+# 6. Start the API
+python -m app.main
+
+# 7. Launch Dagster UI
+export DAGSTER_HOME=./dagster_home
+dagster dev --host 0.0.0.0 --port 3000
 ```
 
 ### Scraper Usage
@@ -551,7 +683,7 @@ For support and questions:
 - **Task 2**: Data Modeling and Transformation - **COMPLETE**
 - **Task 3**: Data Enrichment with YOLO - **COMPLETE**
 - **Task 4**: Analytics API with FastAPI - **COMPLETE**
-- **Task 5**: Pipeline Orchestration with Dagster - **READY TO START**
+- **Task 5**: Pipeline Orchestration with Dagster - **COMPLETE**
 
 ---
 
